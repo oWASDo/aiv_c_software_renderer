@@ -1,6 +1,7 @@
 #include "aiv_renderer.h"
 #include <stdlib.h>
-#include <SDL2/SDL.h>
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
 
 #define triangle(x0, y0, z0, x1, y1, z1, x2, y2, z2) \
     Triangle_new(                                    \
@@ -16,7 +17,7 @@ int main(int argc, char **argv)
 
     ctx.framebuffer = NULL;
 
-    Triangle_t triangle = triangle(0, 0.5, 0, -0.5, 0, 0, 0.5, 0, 0);
+    Triangle_t triangle = triangle(0, 0.5, 0, -0.5, 0, 0, 0, -0.5, 0);
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -37,9 +38,11 @@ int main(int argc, char **argv)
         }
 
         int pitch;
-        SDL_LockTexture(texture, NULL, &ctx.framebuffer, &pitch);
+        SDL_LockTexture(texture, NULL, (void **)&ctx.framebuffer, &pitch);
 
-        rasterize(&ctx, &triangle);
+        ClearBuffer(&ctx, pitch * ctx.height);
+
+        DrawTriangle(ctx, triangle);
 
         SDL_UnlockTexture(texture);
 
