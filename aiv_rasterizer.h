@@ -32,7 +32,7 @@ Triangle_t Triangle_new(Vertex_t a, Vertex_t b, Vertex_t c);
 
 void rasterize(Context_t *ctx, Triangle_t *triangle);
 
-void PutPixel(Context_t *ctx, int x, int y);
+void PutPixel(Context_t *ctx, int x, int y, Vector3_t color);
 
 void PixelConverter(Vertex_t *vertex,  Context_t *ctx);
 
