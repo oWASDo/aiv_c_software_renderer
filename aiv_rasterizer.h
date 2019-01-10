@@ -28,11 +28,6 @@ typedef struct Triangle
     Vertex_t c;
 } Triangle_t;
 
-struct PointerFunction
-{
-    void (*slope_func[2])(Context_t, int, int, int);
-};
-
 Triangle_t Triangle_new(Vertex_t a, Vertex_t b, Vertex_t c);
 
 void rasterize(Context_t *ctx, Triangle_t *triangle);
@@ -50,9 +45,3 @@ void YOrderTriangle(Triangle_t *triangle);
 float Slope(float X0, float Y0, float X1, float Y1);
 
 void DrawTriangle(Context_t ctx, Triangle_t triangle);
-
-void DrawTriangle_Slope(Context_t ctx, Vertex_t a, Vertex_t b, Vertex_t c,  struct PointerFunction *f, int slope);
-
-void FullTriangleDX(Context_t ctx, int i, int X0, int X1);
-
-void FullTriangleSX(Context_t ctx, int i, int X0, int X1);

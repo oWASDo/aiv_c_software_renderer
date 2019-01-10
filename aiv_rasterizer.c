@@ -83,45 +83,49 @@ float Slope(float X0, float Y0, float X1, float Y1)
     return (X1 - X0) / (Y1 - Y0);
 }
 
-void DrawTriangle_Slope(Context_t ctx, Vertex_t a, Vertex_t b, Vertex_t c, struct PointerFunction *f, int slope)
+static void DrawTriangle_Slope(Context_t ctx, Triangle_t triangle, void (**ptr)(Context_t, int, int, int))
 {
+    float slope0 = Slope(triangle.a.raster_x, triangle.a.raster_y, triangle.b.raster_x, triangle.b.raster_y);
+    float slope1 = Slope(triangle.a.raster_x, triangle.a.raster_y, triangle.c.raster_x, triangle.c.raster_y);
+    int slope = slope0 >= slope1 ? 1 : 0;
+
     int i = 0;
-    int dist = b.raster_y - a.raster_y;
-    int dist2 = c.raster_y - a.raster_y;
+    int dist = triangle.b.raster_y - triangle.a.raster_y;
+    int dist2 = triangle.c.raster_y - triangle.a.raster_y;
     int dist3 = 0;
 
-    for (i = a.raster_y; i < a.raster_y + dist; i++)
+    for (i = triangle.a.raster_y; i < triangle.a.raster_y + dist; i++)
     {
-        float gradient = (i - a.raster_y) / (float)dist;
-        float X0 = Lerp(a.raster_x, b.raster_x, gradient);
+        float gradient = (i - triangle.a.raster_y) / (float)dist;
+        float X0 = Lerp(triangle.a.raster_x, triangle.b.raster_x, gradient);
         PutPixel(&ctx, X0, i);
 
-        gradient = (i - a.raster_y) / (float)dist2;
-        float X1 = Lerp(a.raster_x, c.raster_x, gradient);
+        gradient = (i - triangle.a.raster_y) / (float)dist2;
+        float X1 = Lerp(triangle.a.raster_x, triangle.c.raster_x, gradient);
         PutPixel(&ctx, X1, i);
 
-        f->slope_func[slope](ctx, i, X0, X1);
+        ptr[slope](ctx, i, X0, X1);
     }
 
-    dist = c.raster_y - b.raster_y;
-    dist2 = a.raster_y - c.raster_y;
+    dist = triangle.c.raster_y - triangle.b.raster_y;
+    dist2 = triangle.a.raster_y - triangle.c.raster_y;
     dist3 = 0;
 
-    for (i = b.raster_y; i < b.raster_y + dist; i++)
+    for (i = triangle.b.raster_y; i < triangle.b.raster_y + dist; i++)
     {
-        float gradient = (i - b.raster_y) / (float)dist;
-        float X0 = Lerp(b.raster_x, c.raster_x, gradient);
+        float gradient = (i - triangle.b.raster_y) / (float)dist;
+        float X0 = Lerp(triangle.b.raster_x, triangle.c.raster_x, gradient);
         PutPixel(&ctx, X0, i);
 
-        gradient = (i - b.raster_y) / (float)dist2;
-        float X1 = Lerp(a.raster_x, c.raster_x, gradient);
+        gradient = (i - triangle.b.raster_y) / (float)dist2;
+        float X1 = Lerp(triangle.a.raster_x, triangle.c.raster_x, gradient);
         PutPixel(&ctx, X1, i);
 
-        f->slope_func[slope](ctx, i, X0, X1);
+        ptr[slope](ctx, i, X0, X1);
     }
 }
 
-void FullTriangleDX(Context_t ctx, int i, int X0, int X1)
+static void FullTriangleDX(Context_t ctx, int i, int X0, int X1)
 {
     int dist3 = X0 - X1;
     int j = 0;
@@ -129,7 +133,7 @@ void FullTriangleDX(Context_t ctx, int i, int X0, int X1)
         PutPixel(&ctx, j, i);
 }
 
-void FullTriangleSX(Context_t ctx, int i, int X0, int X1)
+static void FullTriangleSX(Context_t ctx, int i, int X0, int X1)
 {
     int dist3 = X1 - X0;
     int j = 0;
@@ -142,13 +146,8 @@ void DrawTriangle(Context_t ctx, Triangle_t triangle)
     rasterize(&ctx, &triangle);
     YOrderTriangle(&triangle);
 
-    float slope0 = Slope(triangle.a.raster_x, triangle.a.raster_y, triangle.b.raster_x, triangle.b.raster_y);
-    float slope1 = Slope(triangle.a.raster_x, triangle.a.raster_y, triangle.c.raster_x, triangle.c.raster_y);
-    int slope = slope0 >= slope1 ? 1 : 0;
-
-    struct PointerFunction functions;
-    functions.slope_func[0] = &FullTriangleSX;
-    functions.slope_func[1] = &FullTriangleDX;
-
-    DrawTriangle_Slope(ctx, triangle.a, triangle.b, triangle.c, &functions, slope);
+    void (*ptr[2])(Context_t, int, int, int);
+    ptr[0] = &FullTriangleSX;
+    ptr[1] = &FullTriangleDX;
+    DrawTriangle_Slope(ctx, triangle, ptr);
 }
