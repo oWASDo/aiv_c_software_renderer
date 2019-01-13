@@ -99,24 +99,16 @@ static void DrawTriangle_Slope(Context_t ctx, Triangle_t triangle, void (**ptr)(
         float gradient = (i - triangle.a.raster_y) / (float)dist;
         float X0 = Lerp(triangle.a.raster_x, triangle.b.raster_x, gradient);
 
-        Vector3_t color;
-        color.x = Lerp(triangle.a.color.x, triangle.b.color.x, gradient);
-        color.y = Lerp(triangle.a.color.y, triangle.b.color.y, gradient);
-        color.z = Lerp(triangle.a.color.z, triangle.b.color.z, gradient);
-
-        PutPixel(&ctx, X0, i, color);
+        Vector3_t c0 = LerpVector3(triangle.a.color, triangle.b.color, gradient);
+        PutPixel(&ctx, X0, i, c0);
 
         gradient = (i - triangle.a.raster_y) / (float)dist2;
         float X1 = Lerp(triangle.a.raster_x, triangle.c.raster_x, gradient);
         
-        Vector3_t color2;
-        color2.x = Lerp(triangle.a.color.x, triangle.c.color.x, gradient);
-        color2.y = Lerp(triangle.a.color.y, triangle.c.color.y, gradient);
-        color2.z = Lerp(triangle.a.color.z, triangle.c.color.z, gradient);
+        Vector3_t c1 = LerpVector3(triangle.a.color, triangle.c.color, gradient);
+        PutPixel(&ctx, X1, i, c1);
 
-        PutPixel(&ctx, X1, i, color2);
-
-        ptr[slope](ctx, i, X0, X1, color2, color);
+        ptr[slope](ctx, i, X0, X1, c1, c0);
     }
 
     dist = triangle.c.raster_y - triangle.b.raster_y;
@@ -129,24 +121,16 @@ static void DrawTriangle_Slope(Context_t ctx, Triangle_t triangle, void (**ptr)(
 
         float X0 = Lerp(triangle.b.raster_x, triangle.c.raster_x, gradient);
 
-        Vector3_t color;
-        color.x = Lerp(triangle.b.color.x, triangle.c.color.x, gradient);
-        color.y = Lerp(triangle.b.color.y, triangle.c.color.y, gradient);
-        color.z = Lerp(triangle.b.color.z, triangle.c.color.z, gradient);
+        Vector3_t c0 = LerpVector3(triangle.b.color, triangle.c.color, gradient);
+        PutPixel(&ctx, X0, i, c0);
 
-        PutPixel(&ctx, X0, i, color);
-
-        gradient = (i - triangle.b.raster_y) / (float)dist2;
+        gradient = (i - triangle.a.raster_y) / (float)dist2;
         float X1 = Lerp(triangle.a.raster_x, triangle.c.raster_x, gradient);
 
-        Vector3_t color2;
-        color2.x = Lerp(triangle.c.color.x, triangle.a.color.x, gradient);
-        color2.y = Lerp(triangle.c.color.y, triangle.a.color.y, gradient);
-        color2.z = Lerp(triangle.c.color.z, triangle.a.color.z, gradient);
+        Vector3_t c1 = LerpVector3(triangle.a.color, triangle.c.color, gradient);
+        PutPixel(&ctx, X1, i, c1);
 
-        PutPixel(&ctx, X1, i, color2);
-
-        ptr[slope](ctx, i, X0, X1, color2, color);
+        ptr[slope](ctx, i, X0, X1, c1, c0);
     }
 }
 
@@ -157,11 +141,8 @@ static void FullTriangleDX(Context_t ctx, int i, int X0, int X1, Vector3_t color
     for (j = X1; j < X1 + dist3; j++)
     {
         float gradient = (j - X1) / (float)dist3;
+        Vector3_t color3 = LerpVector3(color, color2, gradient);
 
-        Vector3_t color3;
-        color3.x = Lerp(color.x, color2.x, gradient);
-        color3.y = Lerp(color.y, color2.y, gradient);
-        color3.z = Lerp(color.z, color2.z, gradient);
         PutPixel(&ctx, j, i, color3);
     }
 }
@@ -173,11 +154,7 @@ static void FullTriangleSX(Context_t ctx, int i, int X0, int X1, Vector3_t color
     for (j = X0; j < X0 + dist3; j++)
     {
         float gradient = (j - X0) / (float)dist3;
-
-        Vector3_t color3;
-        color3.x = Lerp(color2.x, color.x, gradient);
-        color3.y = Lerp(color2.y, color.y, gradient);
-        color3.z = Lerp(color2.z, color.z, gradient);
+        Vector3_t color3 = LerpVector3(color2, color, gradient);
 
         PutPixel(&ctx, j, i, color3);
     }

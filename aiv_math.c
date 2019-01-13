@@ -17,6 +17,15 @@ float Lerp(float start, float end, float gradient)
     return start + (end - start) * gradient;
 }
 
+Vector3_t LerpVector3(Vector3_t start, Vector3_t end, float gradient)
+{
+    Vector3_t v;
+    v.x = start.x + (end.x - start.x) * gradient;
+    v.y = start.y + (end.y - start.y) * gradient;
+    v.z = start.z + (end.z - start.z) * gradient;
+    return v;
+}
+
 float Distance(int startX, int startY, int endX, int endY)
 {
     return sqrt(pow((endX - startX), 2) + pow((endY - startY), 2));

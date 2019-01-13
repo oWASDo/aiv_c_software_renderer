@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
     ctx.framebuffer = NULL;
 
-    Triangle_t triangle = triangle(0, 0.5, 0, 0.5, 0, 0, 0, -0.5, 0);
+    Triangle_t triangle = triangle(0, 0.5, 0, 0.5, 0, 0, -0.25, -0.25, 0);
     triangle.a.color = Vector3_new(255, 0, 0);
     triangle.b.color = Vector3_new(0, 255, 0);
     triangle.c.color = Vector3_new(0, 0, 255);
@@ -70,10 +70,9 @@ int main(int argc, char **argv)
 
         ClearBuffer(&ctx, pitch * ctx.height);
 
-        //Rotate(&triangle.a, pivot, 0.001);
-        //Rotate(&triangle.b, pivot, 0.001);
-        //Rotate(&triangle.c, pivot, 0.001);
-
+        Rotate(&triangle.a, pivot, 0.001);
+        Rotate(&triangle.b, pivot, 0.001);
+        Rotate(&triangle.c, pivot, 0.001);
 
         DrawTriangle(ctx, triangle);
 
