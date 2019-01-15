@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <math.h>
+
+
+
 Vertex_t Vertex_new(Vector3_t position)
 {
     Vertex_t vertex;
@@ -22,10 +26,10 @@ void PutPixel(Context_t *ctx, int x, int y, Vector3_t color)
         return;
 
     int offset = ((y * ctx->width) + x) * 4;
-    ctx->framebuffer[offset] = (char)color.x;
+    ctx->framebuffer[offset + 3] = (char)color.x;
     ctx->framebuffer[offset + 1] = (char)color.y;
     ctx->framebuffer[offset + 2] = (char)color.z;
-    ctx->framebuffer[offset + 3] = 255;
+    ctx->framebuffer[offset] = 255;
 }
 
 void PixelConverter(Vertex_t *vertex, Context_t *ctx)
@@ -96,13 +100,22 @@ static void DrawTriangle_Slope(Context_t ctx, Triangle_t triangle, void (**ptr)(
 
     for (i = triangle.a.raster_y; i < triangle.a.raster_y + dist; i++)
     {
-        float gradient = (i - triangle.a.raster_y) / (float)dist;
+        float gradient = 1;
+
+        if(triangle.b.raster_y != triangle.a.raster_y){
+            gradient = (i - triangle.a.raster_y) / (float)dist;
+        }
+
         float X0 = Lerp(triangle.a.raster_x, triangle.b.raster_x, gradient);
 
         Vector3_t c0 = LerpVector3(triangle.a.color, triangle.b.color, gradient);
         PutPixel(&ctx, X0, i, c0);
 
-        gradient = (i - triangle.a.raster_y) / (float)dist2;
+        gradient = 1;
+        if(triangle.c.raster_y != triangle.a.raster_y){
+            gradient = (i - triangle.a.raster_y) / (float)dist2;
+        }
+
         float X1 = Lerp(triangle.a.raster_x, triangle.c.raster_x, gradient);
         
         Vector3_t c1 = LerpVector3(triangle.a.color, triangle.c.color, gradient);
@@ -160,9 +173,52 @@ static void FullTriangleSX(Context_t ctx, int i, int X0, int X1, Vector3_t color
     }
 }
 
-void DrawTriangle(Context_t ctx, Triangle_t triangle)
+static void ViewToRasterForVertex(Context_t ctx, Vertex_t* vertex, Camera_c camera, float cameraDistance){
+    
+    float projectionX = vertex->viewPosition.x / (cameraDistance * vertex->viewPosition.z);
+    float projectionY = vertex->viewPosition.y  / (cameraDistance * vertex->viewPosition.z);
+
+    vertex->raster_x = (projectionX + 1) * (ctx.width * 0.5);
+    vertex->raster_y = ctx.height - ((projectionY +1 ) * (ctx.height * 0.5));
+
+}
+
+static void ViewToRaster(Context_t ctx, Triangle_t* triangle, Camera_c camera){
+
+    float fov = (camera.fow * 0.5) * (3.1415926535 / 180.0);
+    float camraDistance = tan(fov);
+
+    ViewToRasterForVertex(ctx, &triangle->a, camera, camraDistance);
+    ViewToRasterForVertex(ctx, &triangle->b, camera, camraDistance);
+    ViewToRasterForVertex(ctx, &triangle->c, camera, camraDistance);
+
+   
+}
+void DrawTriangle(Context_t ctx, Triangle_t triangle, Camera_c camera)
 {
-    rasterize(&ctx, &triangle);
+    triangle.a.viewPosition = SubOfVector(triangle.a.position, camera.position);
+    triangle.c.viewPosition = SubOfVector(triangle.c.position, camera.position);
+    triangle.b.viewPosition = SubOfVector(triangle.b.position, camera.position);
+   
+   printf("X:%f ", triangle.b.viewPosition.x);
+   printf("Y:%f ", triangle.b.viewPosition.y);
+   printf("Z:%f \n", triangle.b.viewPosition.z);
+   printf("________\n");
+   printf("________\n");
+   printf("________\n");
+   printf("________\n");
+
+   printf("X:%f ", triangle.b.position.x);
+   printf("Y:%f ", triangle.b.position.y);
+   printf("Z:%f \n", triangle.b.position.z);
+    //triangle.a.viewPosition = SubOfVector(camera.position, triangle.a.position);
+    //triangle.b.viewPosition = SubOfVector(camera.position, triangle.b.position);
+    //triangle.c.viewPosition = SubOfVector(camera.position, triangle.c.position );
+
+
+
+    ViewToRaster(ctx, &triangle, camera);
+    //rasterize(&ctx, &triangle);
     YOrderTriangle(&triangle);
 
     void (*ptr[2])(Context_t, int, int, int, Vector3_t, Vector3_t);

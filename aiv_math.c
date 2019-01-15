@@ -30,3 +30,21 @@ float Distance(int startX, int startY, int endX, int endY)
 {
     return sqrt(pow((endX - startX), 2) + pow((endY - startY), 2));
 }
+
+Vector3_t SumOfVector(Vector3_t v0, Vector3_t v1){
+    Vector3_t v2;
+    v2.x = v0.x + v1.x;
+    v2.y = v0.y + v1.y;
+    v2.z = v0.z + v1.z;
+
+    return v2;
+}
+
+Vector3_t SubOfVector(Vector3_t v0, Vector3_t v1){
+    Vector3_t v2;
+    v2.x = v0.x - v1.x;
+    v2.y = v0.y - v1.y;
+    v2.z = v0.z - v1.z;
+
+    return v2;
+}

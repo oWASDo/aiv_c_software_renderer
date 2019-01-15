@@ -1,5 +1,5 @@
-CC=clang
-CFLAGS=-Wall -Wno-pragma-pack -ISDL2-2.0.9\include
+CC=C:\Program Files\LLVM\bin\clang
+CFLAGS=-Wall -Wno-pragma-pack -I SDL2-2.0.9\include
 LDFLAGS=-lSDL2
 BINARY=rasterize
 BINARY_TESTS=rasterize_tests

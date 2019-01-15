@@ -32,18 +32,55 @@ static void Rotate(Vertex_t *vertex, Vector3_t pivot, float value)
     vertex->position.y = Y;
 }
 
+
+
 int main(int argc, char **argv)
 {
+    Camera_c cam;
+    cam.position = Vector3_new(0.1,0.2,-3);
+    cam.fow = 60;
+
+    Triangle_t *arrayOfTriangle = NULL;
+    size_t arrayOfTriangleSize = 4;
+
+    int *resizedArea = realloc(arrayOfTriangle, sizeof(Triangle_t) * arrayOfTriangleSize);
+    if(!resizedArea){
+        return 1;
+    }
+
+    arrayOfTriangle = resizedArea;
+
     Context_t ctx;
     ctx.width = 600;
     ctx.height = 600;
 
     ctx.framebuffer = NULL;
 
-    Triangle_t triangle = triangle(0, 0.5, 0, 0.5, 0, 0, -0.25, -0.25, 0);
+    Triangle_t triangle = triangle(-1, 1, 0,    -1, 0.9 , 0,    -0.9, 1, 0);
     triangle.a.color = Vector3_new(255, 0, 0);
     triangle.b.color = Vector3_new(0, 255, 0);
     triangle.c.color = Vector3_new(0, 0, 255);
+
+    Triangle_t triangle1 = triangle(1, 1, -0,    1, 0.9, -0,     0.9, 1, -0);
+    triangle1.a.color = Vector3_new(255, 0, 0);
+    triangle1.b.color = Vector3_new(0, 0, 255);
+    triangle1.c.color = Vector3_new(0, 255, 0);
+
+    Triangle_t triangle2 = triangle(-1, -1, -0,     -1, -0.9, -0,    -0.9, -1, -0);
+    triangle2.a.color = Vector3_new(255, 0, 0);
+    triangle2.b.color = Vector3_new(0, 0, 255);
+    triangle2.c.color = Vector3_new(0, 255, 0);
+
+    Triangle_t triangle3 = triangle(1, -1, -0,     1, -0.9, -0,    0.9, -1, -0);
+    triangle3.a.color = Vector3_new(255, 0, 0);
+    triangle3.b.color = Vector3_new(0, 255, 0);
+    triangle3.c.color = Vector3_new(0, 0, 255);
+
+    arrayOfTriangle[0] = triangle;
+    arrayOfTriangle[1] = triangle1;
+    arrayOfTriangle[2] = triangle2;
+    arrayOfTriangle[3] = triangle3;
+
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -67,14 +104,21 @@ int main(int argc, char **argv)
 
         int pitch;
         SDL_LockTexture(texture, NULL, (void **)&ctx.framebuffer, &pitch);
-
         ClearBuffer(&ctx, pitch * ctx.height);
 
-        Rotate(&triangle.a, pivot, 0.001);
-        Rotate(&triangle.b, pivot, 0.001);
-        Rotate(&triangle.c, pivot, 0.001);
+        //Rotate(&triangle.a, pivot, 0.001);
+        //Rotate(&triangle.b, pivot, 0.001);
+        //Rotate(&triangle.c, pivot, 0.001);
+        int i;
+        for(i = 0; i < arrayOfTriangleSize; i++)
+        {
+            DrawTriangle(ctx, arrayOfTriangle[i], cam);
+        }
+        
 
-        DrawTriangle(ctx, triangle);
+
+
+
 
         SDL_UnlockTexture(texture);
 
